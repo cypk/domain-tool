@@ -1,0 +1,6 @@
+#!/bin/bash
+function digTool {
+    dig $1 A
+}
+
+digTool
