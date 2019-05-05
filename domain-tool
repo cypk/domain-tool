@@ -3,19 +3,21 @@
 # Assigns the given domain name variable $1 to domain.
 domain=$1
 
+rawWhois=$(whois -H "$domain")
+
 # Runs several dig queries and assigns the results to variables.
 function digParser() {
-	dig_a=`dig +noall +answer $domain a | grep 'A' | awk '{$1=$2=$3=""; print $0}'`
-	dig_mx=`dig +noall +answer $domain mx | grep 'MX' | awk '{$1=$2=$3=""; print $0}'`
+	dig_a=$(dig +noall +answer $domain a | grep "A" | awk '{$1=$2=$3=""; print $0}')
+	dig_mx=$(dig +noall +answer $domain mx | grep "MX" | awk '{$1=$2=$3=""; print $0}')
 }	
 
 # Runs several whois queries and assigns the results to variables.
- function whoisTool {
-	whoisNS=`whois -H $domain | grep -m 2 'Name Server'`
- 	whoisRegistrar=`whois -H $domain | grep -m 1 'Registrar'`
-	whoisRegistrant=`whois -H $domain | grep -m 1 'Registrant'`
-	whoisReseller=`whois -H $domain | grep -m 1 'Reseller'`
-	whoisExpDate=`whois -H $domain | grep -m 1 'Expiration'`
+function whoisTool() {
+    whoisNS=$(echo "$rawWhois" | grep -m 2 "Name Server")
+    whoisRegistrar=$(echo "$rawWhois" | grep -m 1 "Registrar:")
+    whoisRegistrant=$(echo "$rawWhois" | grep -m 1 "Registrant")
+    whoisReseller=$(echo "$rawWhois" | grep -m 1 "Reseller:")
+    whoisExpDate=$(echo "$rawWhois" | grep -m 1 "Expiration")
  }
 
 echo ''
