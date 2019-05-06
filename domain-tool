@@ -7,8 +7,8 @@ rawWhois=$(whois -H "$domain")
 
 # Runs several dig queries and assigns the results to variables.
 function digParser() {
-	dig_a=$(dig +noall +answer $domain a | grep "A" | awk '{$1=$2=$3=""; print $0}')
-	dig_mx=$(dig +noall +answer $domain mx | grep "MX" | awk '{$1=$2=$3=""; print $0}')
+    dig_a=$(dig +noall +answer "$domain" a | grep "A" | awk '{$1=$2=$3=""; print $0}')
+    dig_mx=$(dig +noall +answer "$domain" mx | grep "MX" | awk '{$1=$2=$3=""; print $0}')
 }	
 
 # Runs several whois queries and assigns the results to variables.
@@ -25,18 +25,18 @@ echo ''
 echo 'Dig Results:'
 # Prints dig variables.
 digParser
-echo $domain $dig_a
-echo $domain $dig_mx
+echo "$domain" "$dig_a"
+echo "$domain" "$dig_mx"
 
 echo ''
 
 echo 'Whois Results:'
 # Prints whois variables.
 whoisTool
-echo $whoisNS
-echo $whoisRegistrar
-echo $whoisRegistrant
-echo $whoisReseller
-echo $whoisExpDate
+echo "$whoisNS"
+echo "$whoisRegistrar"
+echo "$whoisRegistrant"
+echo "$whoisReseller"
+echo "$whoisExpDate"
 
 echo ''
