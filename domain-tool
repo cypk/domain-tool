@@ -1,42 +1,94 @@
 #!/bin/bash
 
-# Assigns the given domain name variable $1 to domain.
-domain=$1
+input=$1
 
-rawWhois=$(whois -H "$domain")
+# Checks to see if enter ip falls between 0-9 for 1 to 3 places.
 
+function valid_ip {  
+	
+    local  input=$1
+    local  status=1
+
+    if [[ $input =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        # Break the IP into an array
+        IFS='.' read -r -a ip <<< "$input"
+    
+        # Check to see if ip is equal to or lower than 255.
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        status="$?"
+    fi
+    
+        return $status
+
+}
+
+# Checks to see if domain entered is valid.
+function valid_domain {
+
+    host $1 2>&1 > /dev/null
+    return $?
+
+}
+    
 # Runs several dig queries and assigns the results to variables.
-function digParser() {
+
+function digParser {
+    
     dig_a=$(dig +noall +answer "$domain" a | grep "A" | awk '{$1=$2=$3=""; print $0}')
     dig_mx=$(dig +noall +answer "$domain" mx | grep "MX" | awk '{$1=$2=$3=""; print $0}')
+
 }	
 
 # Runs several whois queries and assigns the results to variables.
-function whoisTool() {
+function whoisParser {
+
     whoisNS=$(echo "$rawWhois" | grep -m 2 "Name Server")
     whoisRegistrar=$(echo "$rawWhois" | grep -m 1 "Registrar:")
     whoisRegistrant=$(echo "$rawWhois" | grep -m 1 "Registrant")
     whoisReseller=$(echo "$rawWhois" | grep -m 1 "Reseller:")
     whoisExpDate=$(echo "$rawWhois" | grep -m 1 "Expiration")
- }
 
-echo ''
+}
 
-echo 'Dig Results:'
-# Prints dig variables.
-digParser
-echo "$domain" "$dig_a"
-echo "$domain" "$dig_mx"
+if valid_ip "$input"; then
 
-echo ''
+    # Assign the passed variable to ip.
+    ip="$1"
 
-echo 'Whois Results:'
-# Prints whois variables.
-whoisTool
-echo "$whoisNS"
-echo "$whoisRegistrar"
-echo "$whoisRegistrant"
-echo "$whoisReseller"
-echo "$whoisExpDate"
+    dig -x "$ip" | grep -m 2 "PTR" | tail -n +2
 
-echo ''
+elif valid_domain "$input"; then
+
+    # Assign the passed variable to domain.
+    domain="$1"
+
+    rawWhois="$(whois -H "$domain")"
+
+    echo ''
+
+    echo 'Dig Results:'
+
+    # Prints dig variables.
+    digParser
+    echo "$domain" "$dig_a"
+    echo "$domain" "$dig_mx"
+
+    echo ''
+
+    echo 'Whois Results:'
+
+    # Prints whois variables.
+    whoisParser
+    echo "$whoisNS"
+    echo "$whoisRegistrar"
+    echo "$whoisRegistrant"
+    echo "$whoisReseller"
+    echo "$whoisExpDate"
+
+    echo ''
+
+else
+
+    echo "Please enter a valid domain name or ip address."
+
+fi
