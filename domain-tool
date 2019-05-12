@@ -54,7 +54,9 @@ if valid_ip "$input"; then
 
     # Assign the passed variable to ip.
     ip="$1"
-
+    echo "==> Valid IP Address found!"
+    echo "==> Running reverse dig on IP Address ..."
+    
     dig -x "$ip" | grep -m 2 "PTR" | tail -n +2
 
 elif valid_domain "$input"; then
@@ -62,18 +64,18 @@ elif valid_domain "$input"; then
     # Assign the passed variable to domain.
     domain="$1"
 
-    rawWhois="$(whois -H "$domain")"
+    rawWhois="$(whois "$domain")"
 
-    echo ''
-
-    echo 'Dig Results:'
+    echo ""
+    echo "==> Valid Domain name found."
+    echo "==> Running dig on domain "$domain" ..."
 
     # Prints dig variables.
     digParser
     echo "$domain" "$dig_a"
     echo "$domain" "$dig_mx"
 
-    echo ''
+    echo ""
 
     echo 'Whois Results:'
 
@@ -85,7 +87,7 @@ elif valid_domain "$input"; then
     echo "$whoisReseller"
     echo "$whoisExpDate"
 
-    echo ''
+    echo ""
 
 else
 
