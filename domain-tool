@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# if $1 has www.
+#    then strip www. and assign to input
+# else
+#    input=$1
+# fi
+
 input=$1
 
 # Checks to see if enter ip falls between 0-9 for 1 to 3 places.
 
+# Check to see if IP entered is valid.
 function valid_ip {  
 	
     local  input=$1
@@ -25,7 +32,7 @@ function valid_ip {
 # Checks to see if domain entered is valid.
 function valid_domain {
 
-    host $1 2>&1 > /dev/null
+    host "$1" 2>&1 > /dev/null 
     return $?
 
 }
@@ -59,7 +66,7 @@ if valid_ip "$input"; then
     
     dig -x "$ip" | grep -m 2 "PTR" | tail -n +2
 
-elif valid_domain "$input"; then
+    elif valid_domain "$input"; then
 
     # Assign the passed variable to domain.
     domain="$1"
@@ -72,20 +79,21 @@ elif valid_domain "$input"; then
 
     # Prints dig variables.
     digParser
-    echo "$domain" "$dig_a"
-    echo "$domain" "$dig_mx"
+    echo "$dig_a" | awk '{$1=$1};1' 
+    echo "$dig_mx" | awk '{$1=$1};1' | sed 's|\(.*\).|\1 |'
 
     echo ""
 
-    echo 'Whois Results:'
+    echo "==> Running whois on domain "$domain" ..."
 
     # Prints whois variables.
     whoisParser
-    echo "$whoisNS"
-    echo "$whoisRegistrar"
-    echo "$whoisRegistrant"
-    echo "$whoisReseller"
-    echo "$whoisExpDate"
+
+    echo "$whoisNS" | awk '{$1=$1};1'
+    echo "$whoisRegistrar" | awk '{$1=$1};1' | tr -d '\.'
+    echo "$whoisRegistrant" | awk '{$1=$1};1' | sed 's|Registry Registrant ID|Registrant|'
+    echo "$whoisReseller" | awk '{$1=$1};1' | sed 's| http.*||'
+    echo "$whoisExpDate" | awk '{$1=$1};1' | sed -e 's|Registrar Registration ||' -e 's|||' | cut -b 1-27
 
     echo ""
 
